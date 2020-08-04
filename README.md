@@ -1,2 +1,2 @@
 # whatsapp_couple_conv_analyzer
-Class to derive statistics (an arguments) for couple conversations on Whatsapp
+Class to derive statistics (and arguments) for couple conversations on Whatsapp
