@@ -12,7 +12,7 @@ from whatsapp_couple_conversation_analyzer import whatsapp_analyzer
 whatsapp = whatsapp_analyzer("_chat.txt",language = 'french',top_x_common_words = 30) 
 df = whatsapp.analyse(specific_preprocessing = True)
 ```
-- or follow the[jupyter notebook tutorial](https://github.com/AmauryLejay/whatsapp_couple_conv_analyzer/blob/master/tutorial.ipynb)
+- or follow the [jupyter notebook tutorial](https://github.com/AmauryLejay/whatsapp_couple_conv_analyzer/blob/master/tutorial.ipynb)
 - Have fun! 
 
 #### Limitations
