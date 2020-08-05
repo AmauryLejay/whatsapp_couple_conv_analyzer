@@ -37,11 +37,11 @@ class whatsapp_analyzer():
 		file1.close()
 		return df 
 
-	def apply_preprocessing(self,df):
+	def apply_preprocessing(self,df,specific_preprocessing):
 
 		"""create various column useful for analysis
 		input raw pandas dataframe
-		out pandas dataframe with about 10 new columns"""
+		output pandas dataframe with about 10 new columns"""
 
 		df['raw_date'] = df['raw_message'].apply(lambda row: row.split("]")[0])
 		df['datetime'] = df['raw_date'].apply(lambda row: dt.datetime.strptime(row, '%m/%d/%y, %I:%M:%S %p'))
@@ -56,15 +56,20 @@ class whatsapp_analyzer():
 		df['weekend'] = 0
 		df.loc[df.weekday > 4, 'weekend'] = 1
 
+		# Isolating the name of the unique users
+		self.first_user = df['sender'].unique()[0]
+		self.second_user = df['sender'].unique()[1]
+		
+		if specific_preprocessing:
+			df['sender'] = df['sender'].map({self.first_user:"user_1",self.second_user:"user_2"},)
+			self.first_user = "user_1"
+			self.second_user = "user_2"
+
 		# Creating a first_message column
 		self.df_drop_duplicates_day = df.drop_duplicates(subset=['actual_date'],keep = 'first').copy()
 		self.df_drop_duplicates_day['first_message'] = 1
 		df = pd.merge(df, self.df_drop_duplicates_day['first_message'],how = 'left',right_index= True, left_index= True)
 		df['first_message'].fillna(0,inplace= True)
-
-		# Isolating the name of the unique users
-		self.first_user = df['sender'].unique()[0]
-		self.second_user = df['sender'].unique()[1]
 
 		return df 
 
@@ -123,10 +128,23 @@ class whatsapp_analyzer():
 
 		return df_number_deleted_messages
 
+	def number_of_missed_voice_call(self,df):
+		"""Simply compute the number of missed voice calls
+		input: pandas dataframe
+		output: pandas dataframe"""
+
+		df_missed_voice_call = df[df['actual_message'].str.contains('Missed voice call')]
+		df_missed_voice_call = pd.DataFrame(df_missed_voice_call.groupby(by= ['sender'])['raw_message'].count())
+
+		return df_missed_voice_call
+
 	def most_common_words_used(self, df):
 		"""Compute the most common words used by each users while removing the stop words
 		input : pandas dataframe
 		output : pandas dataframe"""
+
+		# Removing the messages refering to missed voice calls as these should not account in the counting of most common words
+		df = df[~df['actual_message'].str.contains('Missed voice call')]
 
 		user_1_words = "".join(list(df[df['sender'] == self.first_user]['actual_message']))
 		user_2_words = "".join(list(df[df['sender'] == self.second_user]['actual_message']))
@@ -149,55 +167,95 @@ class whatsapp_analyzer():
 
 		print("Total Number of messages sent")
 		print(pd.DataFrame(df.groupby(by = ['sender']).count()['raw_message']).sort_values(by = ['raw_message'], ascending=False))
-		print(" ")
+		print("________________________________________________________________________________")
 
 		plt.title("Distribution of total messages sent during the week")
-		print(pd.DataFrame(df.groupby(by = ['weekday']).count()['raw_message']).T)
 		plt.plot(pd.DataFrame(df.groupby(by = ['weekday']).count()['raw_message']))
 		plt.show()
-		print(" ")
+		
+		try: 
+			# More convenient if open in Jupyter version but won't work in terminal
+			display(pd.DataFrame(df.groupby(by = ['weekday']).count()['raw_message']).T)
+		except: 
+			# Adapted to terminal display
+			print(pd.DataFrame(df.groupby(by = ['weekday']).count()['raw_message']).T)
+		print("________________________________________________________________________________")
 
 		plt.plot(pd.DataFrame(df.groupby(by = ['actual_date']).count()['raw_message']))
 		plt.title("Distribution of total daily messages sent so far")
 		plt.show()
-		print(" ")
+		print("________________________________________________________________________________")
 
-		print(pd.DataFrame(df[df['weekend']==0].groupby(by = ['hour']).count()['raw_message']).T)
 		plt.plot(pd.DataFrame(df[df['weekend']==0].groupby(by = ['hour']).count()['raw_message']))
 		plt.title("Distribution of total hourly messages sent during WEEKDAYS")
 		plt.show()
-		print(" ")
+		try: 
+			# More convenient if open in Jupyter version but won't work in terminal
+			display(pd.DataFrame(df[df['weekend']==0].groupby(by = ['hour']).count()['raw_message']).T)
+		except: 
+			# Adapted to terminal display
+			print(pd.DataFrame(df[df['weekend']==0].groupby(by = ['hour']).count()['raw_message']).T)
+		print("________________________________________________________________________________")
 
-		print(pd.DataFrame(df[df['weekend']==1].groupby(by = ['hour']).count()['raw_message']).T)
 		plt.plot(pd.DataFrame(df[df['weekend']==1].groupby(by = ['hour']).count()['raw_message']))
 		plt.title("Distribution of total hourly messages sent during WEEKEND")
 		plt.show()
-		print(" ")
+		try: 
+			# More convenient if open in Jupyter version but won't work in terminal
+			display(pd.DataFrame(df[df['weekend']==1].groupby(by = ['hour']).count()['raw_message']).T)
+		except: 
+			# Adapted to terminal display
+			print(pd.DataFrame(df[df['weekend']==1].groupby(by = ['hour']).count()['raw_message']).T)
+		print("________________________________________________________________________________")
 
 		print("Number of first messages of the day sent")
-		print(pd.DataFrame(self.df_drop_duplicates_day.groupby(by = ['sender'])['raw_message'].count()).sort_values(by = ['raw_message'], ascending=False))
-		print(" ")
+		try: 
+			# More convenient if open in Jupyter version but won't work in terminal
+			display(pd.DataFrame(self.df_drop_duplicates_day.groupby(by = ['sender'])['raw_message'].count()).sort_values(by = ['raw_message'], ascending=False))
+		except: 
+			# Adapted to terminal display
+			print(pd.DataFrame(self.df_drop_duplicates_day.groupby(by = ['sender'])['raw_message'].count()).sort_values(by = ['raw_message'], ascending=False))
+		print("________________________________________________________________________________")
 
-		print("Average response time from each users")
+		print("Average response time from each users (minutes)")
 		response_time = self.average_response_time(df)
-		print(pd.DataFrame(data = [response_time[0],response_time[1]], index = [self.first_user ,self.second_user],columns = ['average response time']))
-		print(" ")
+		try: 
+			# More convenient if open in Jupyter version but won't work in terminal
+			display(pd.DataFrame(data = [response_time[0],response_time[1]], index = [self.first_user ,self.second_user],columns = ['average response time']))
+		except: 
+			# Adapted to terminal display
+			print(pd.DataFrame(data = [response_time[0],response_time[1]], index = [self.first_user ,self.second_user],columns = ['average response time']))
+		print("________________________________________________________________________________")
 
 		print("Number of consecutive days without talking")
 		print(self.number_of_days_without_conversation(df))
-		print(" ")
+		print("________________________________________________________________________________")
 
 		print("Number of deleted messages")
 		print(self.number_of_deleted_messages(df))
-		print(" ")
+		print("________________________________________________________________________________")
+
+		print("Number of missed voice calls (only available for the user who downloaded the conversation")
+		print(self.number_of_missed_voice_call(df))
+		print("________________________________________________________________________________")
 
 		print(f"Most common words used by {self.first_user}")
-		print(pd.DataFrame(self.most_common_words_used(df)[0],columns= ['word','count']))
-		print(" ")
+		try: 
+			# More convenient if open in Jupyter version but won't work in terminal
+			display(pd.DataFrame(self.most_common_words_used(df)[0],columns= ['word','count']))
+		except: 
+			# Adapted to terminal display
+			print(pd.DataFrame(self.most_common_words_used(df)[0],columns= ['word','count']))
+		print("________________________________________________________________________________")
 
 		print(f"Most common words used by {self.second_user}")
-		print(pd.DataFrame(self.most_common_words_used(df)[1],columns= ['word','count']))
-		print(" ")
+		try: 
+			# More convenient if open in Jupyter version but won't work in terminal
+			display(pd.DataFrame(self.most_common_words_used(df)[1],columns= ['word','count']))
+		except: 
+			# Adapted to terminal display
+			print(pd.DataFrame(self.most_common_words_used(df)[1],columns= ['word','count']))
+		print("________________________________________________________________________________")
 
 		return 0
 
@@ -205,7 +263,7 @@ class whatsapp_analyzer():
 		"""main method
 		input :
 		specific_preprocessing (optional) - Boolean - 
-		return 
+		output : display of pandas dataframe and various plots 
 		"""
 		# read file
 		df = self.read_file()
@@ -215,7 +273,7 @@ class whatsapp_analyzer():
 			df.drop([0,3531],inplace = True)
 
 		# create various columns
-		df = self.apply_preprocessing(df)
+		df = self.apply_preprocessing(df,specific_preprocessing)
 
 		return self.visualize(df)
 
