@@ -279,7 +279,7 @@ class whatsapp_analyzer():
 
 if __name__ == '__main__':
 
-	analyser = whatsapp_analyzer("_chat.txt")
+	analyser = whatsapp_analyzer("_chat.txt",language = 'french',top_x_common_words = 30)
 	df = analyser.analyse()
 
 	print(df)
