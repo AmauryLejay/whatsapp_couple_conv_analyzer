@@ -1,7 +1,7 @@
 ### Whatsapp couple conversation analyzer
 
 #### Why? 
-Short weekend project aimed at buidling a [&lt;python class &gt;](https://github.com/AmauryLejay/whatsapp_couple_conv_analyzer/blob/master/whatsapp_couple_conversation_analyzer.py) to draw quick and meaninfull statistics about my partner and I whatsapp conversation. 
+Short weekend project aimed at buidling a [python class](https://github.com/AmauryLejay/whatsapp_couple_conv_analyzer/blob/master/whatsapp_couple_conversation_analyzer.py) to draw quick and meaninfull statistics about my partner and I whatsapp conversation. 
 Current solutions offer even more basic analysis, where metrics measured are more directed toward group of friends conversations.
 
 #### How to use it?
@@ -12,7 +12,7 @@ from whatsapp_couple_conversation_analyzer import whatsapp_analyzer
 whatsapp = whatsapp_analyzer("_chat.txt",language = 'french',top_x_common_words = 30) 
 df = whatsapp.analyse(specific_preprocessing = True)
 ```
-- Follow the[&lt;jupyter notebook tutorial&gt;](https://github.com/AmauryLejay/whatsapp_couple_conv_analyzer/blob/master/tutorial.ipynb)
+- or follow the[jupyter notebook tutorial](https://github.com/AmauryLejay/whatsapp_couple_conv_analyzer/blob/master/tutorial.ipynb)
 - Have fun! 
 
 #### Limitations
