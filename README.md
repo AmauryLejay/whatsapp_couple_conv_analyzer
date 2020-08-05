@@ -1,3 +1,5 @@
+![Whatsapp](https://github.com/AmauryLejay/whatsapp_couple_conv_analyzer/blob/master/image.png?raw=true)
+
 ### Whatsapp couple conversation analyzer
 
 #### Why? 
@@ -26,4 +28,4 @@ df = whatsapp.analyse(specific_preprocessing = True)
 - favourit emojies analysis
 - support for larger group conversation - not difficult but a bit more work and not in my interest at the moment.
 
-Make good use of it if you do ;)
+Make good use of it if you do :wink:
