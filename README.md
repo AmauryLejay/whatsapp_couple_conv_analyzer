@@ -1,5 +1,3 @@
-![Whatsapp](https://github.com/AmauryLejay/whatsapp_couple_conv_analyzer/blob/master/image.png?raw=true)
-
 ### Whatsapp couple conversation analyzer
 
 #### Why? 
